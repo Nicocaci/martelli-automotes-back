@@ -133,7 +133,7 @@ class UsuarioController {
         sameSite: "None", // 🔥 Importante para que funcione en diferentes dominios
         maxAge: 24 * 60 * 60 * 1000, // 24 horas
         path: '/',
-        // domain: ".railway.app", // Disponible en toda la app
+        domain: ".railway.app", // Disponible en toda la app
       });
 
       return res.status(201).json({
@@ -151,7 +151,7 @@ class UsuarioController {
       httpOnly: true,
       secure: true,
       sameSite: "None",
-      // domain: ".railway.app",
+      domain: ".railway.app",
       path: "/"
     });
     res.status(200).json({ message: "Logout exitoso" });
