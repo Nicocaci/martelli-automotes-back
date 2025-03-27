@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 
 const usuarioSchema = mongoose.Schema({
-  nombre:{
+  agencia:{
     type: String,
     required: true,
   },
-  apellido:{
-    type: String,
+  dni:{
+    type: Number,
     required: true
   },
   telefono:{

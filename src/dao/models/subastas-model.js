@@ -51,7 +51,15 @@ const subastaSchema = new mongoose.Schema({
     type: Boolean, 
     default: false // Nueva propiedad para saber si la subasta terminó
   },
-  tiempoExtraRestante: { type: Number, default: null }
+  tiempoExtraRestante: { 
+    type: Number, 
+    default: null
+  },
+  ganador: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "usuarios", 
+    default: null 
+  }
 });
 
 

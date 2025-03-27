@@ -76,7 +76,7 @@ class UsuarioController {
 
 
   async register(req, res) {
-    const { nombre, apellido, email, password, telefono, direccion } = req.body;
+    const { agencia,dni , email, password, telefono, direccion } = req.body;
     try {
       const existeUsuario = await UsuarioModel.findOne({ email });
       if (existeUsuario) {
@@ -86,8 +86,8 @@ class UsuarioController {
       const hashPassword = bcrypt.hashSync(password, 10);
 
       const nuevoUsuario = await UsuarioService.crearUsuario({
-        nombre,
-        apellido,
+        agencia,
+        dni,
         email,
         telefono,
         password: hashPassword,
@@ -124,8 +124,7 @@ class UsuarioController {
       const token = generateToken({
         _id: usuario._id,
         email: usuario.email,
-        nombre: usuario.nombre,
-        ofertas: usuario.ofertasHechas,
+        agencia: usuario.agencia,
         rol: usuario.rol
       })
       res.cookie('acces_token', token, {
@@ -134,7 +133,7 @@ class UsuarioController {
         sameSite: "None", // 🔥 Importante para que funcione en diferentes dominios
         maxAge: 24 * 60 * 60 * 1000, // 24 horas
         path: '/',
-        domain: ".railway.app", // Disponible en toda la app
+        // domain: ".railway.app", // Disponible en toda la app
       });
 
       return res.status(201).json({
@@ -152,7 +151,7 @@ class UsuarioController {
       httpOnly: true,
       secure: true,
       sameSite: "None",
-      domain: ".railway.app",
+      // domain: ".railway.app",
       path: "/"
     });
     res.status(200).json({ message: "Logout exitoso" });
