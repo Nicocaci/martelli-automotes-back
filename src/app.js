@@ -15,7 +15,7 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: "https://martelli-automotores-front-dev-production.up.railway.app",
+        origin: "https://martelli-automotores-front-production.up.railway.app/",
         credentials: true,
     }
 });
@@ -31,7 +31,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(cors({
-    origin: "https://martelli-automotores-front-dev-production.up.railway.app",
+    origin: "https://martelli-automotores-front-production.up.railway.app/",
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
