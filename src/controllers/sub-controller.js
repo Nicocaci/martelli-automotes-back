@@ -2,6 +2,7 @@ import SubastaModel from '../dao/models/subastas-model.js';
 import SubastaService from '../service/sub-service.js';
 import { io } from '../app.js';
 import UsuarioModel from '../dao/models/usuario-model.js';
+import { enviarCorreoGanador } from '../service/email-service.js';
 
 
 class SubastaController {
@@ -85,9 +86,14 @@ async agregarOferta(req, res) {
       await subasta.save();
     }
 
+    //Obtener la oferta mas alta y el usuario que la hizo
+    const highestOffer = subasta.ofertadores.reduce((max, o) => (o.monto > max.monto ? o : max), subasta.ofertadores[0]);
+    
     // Emitir evento de actualización a través de WebSocket
     io.emit('subastaActualizada', {
       subastaId: subasta._id,
+      highestBid:highestOffer.monto,
+      highestBidder: highestOffer.usuario,
       tiempoExtraRestante: subasta.tiempoExtraRestante,
       finalizada: subasta.finalizada
     });
@@ -103,49 +109,54 @@ async agregarOferta(req, res) {
 async finalizarSubasta(req, res) {
   const { id } = req.params;
   try {
-      const subasta = await SubastaModel.findById(id);
-      if (!subasta) {
-          return res.status(404).json({ message: "Subasta no encontrada" });
+    const subasta = await SubastaModel.findById(id);
+    if (!subasta) {
+      return res.status(404).json({ message: "Subasta no encontrada" });
+    }
+
+    let ganadorAgencia = "Sin ganador";
+    let emailGanador = null;
+    let usuarioGanador = null; // 🔥 Definir fuera del bloque para evitar errores
+
+    if (subasta.ofertadores.length > 0) {
+      const ofertaGanadora = subasta.ofertadores.reduce((max, oferta) =>
+        oferta.monto > max.monto ? oferta : max
+      );
+
+      usuarioGanador = await UsuarioModel.findById(ofertaGanadora.usuario); // Ahora es accesible en todo el bloque
+
+      if (usuarioGanador) {
+        subasta.ganador = usuarioGanador._id;
+        ganadorAgencia = usuarioGanador.agencia;
+        emailGanador = usuarioGanador.email; 
       }
-      
-      let ganadorAgencia = "Sin ganador";
+    } else {
+      subasta.ganador = null;
+    }
 
-      // Obtener la oferta más alta y asignar al ganador
-      if (subasta.ofertadores.length > 0) {
-          const ofertaGanadora = subasta.ofertadores.reduce((max, oferta) =>
-              oferta.monto > max.monto ? oferta : max
-          );
+    subasta.finalizada = true;
+    subasta.tiempoExtraRestante = null;
 
-          const usuarioGanador = await UsuarioModel.findById(ofertaGanadora.usuario); // 🔥 Populamos usuario
-          
-          if (usuarioGanador) {
-              subasta.ganador = usuarioGanador._id; // Guarda el ID en la base de datos
-              ganadorAgencia = usuarioGanador.agencia; // Enviamos el nombre de la agencia
-          }
-      } else {
-          subasta.ganador = null;
-      }
-      
-      subasta.finalizada = true;
-      subasta.tiempoExtraRestante = null; // Resetear el tiempo extra
-      await subasta.save();
+    // 📩 Solo enviar email si no fue enviado antes y hay un ganador
+    if (!subasta.emailEnviado && usuarioGanador) {
+      await enviarCorreoGanador(emailGanador, subasta._id);
+      subasta.emailEnviado = true; // 🔥 Marcamos como enviado
+    }
 
-      console.log("Emitido evento subastaFinalizada con datos:", {
-          subastaId: subasta._id,
-          ganador: ganadorAgencia,
-      });
-      
-      io.emit("subastaFinalizada", {
-          subastaId: subasta._id,
-          ganador: ganadorAgencia, // 🔥 Ahora enviamos la agencia en lugar del ID
-      });
+    await subasta.save();
 
-      res.status(200).json({ message: "Subasta finalizada correctamente", ganador: ganadorAgencia });
+    io.emit("subastaFinalizada", {
+      subastaId: subasta._id,
+      ganador: ganadorAgencia,
+    });
+
+    res.status(200).json({ message: "Subasta finalizada correctamente", ganador: ganadorAgencia });
   } catch (error) {
-      console.error("Error en finalizarSubasta:", error);
-      res.status(500).json({ message: "Error al finalizar la subasta", error });
+    console.error("Error en finalizarSubasta:", error);
+    res.status(500).json({ message: "Error al finalizar la subasta", error });
   }
 }
+
 
 
 async activarTiempoExtra(req, res) {

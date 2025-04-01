@@ -59,7 +59,8 @@ const subastaSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId, 
     ref: "usuarios", 
     default: null 
-  }
+  },
+  emailEnviado: { type: Boolean, default: false } // 🔥 Nuevo campo
 });
 
 
