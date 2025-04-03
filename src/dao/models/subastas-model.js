@@ -20,7 +20,7 @@ const subastaSchema = new mongoose.Schema({
     },
     img: {
       type: String,
-    }
+    },
   },
   fechaInicio: {
     type: Date,
