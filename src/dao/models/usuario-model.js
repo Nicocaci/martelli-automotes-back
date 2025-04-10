@@ -1,9 +1,16 @@
 import mongoose from "mongoose";
 
 const usuarioSchema = mongoose.Schema({
+  nombre:{
+    type: String,
+  },
   agencia:{
     type: String,
     required: true,
+  },
+  razonSocial: {
+    type: String,
+    require: true,
   },
   dni:{
     type: Number,
@@ -29,6 +36,10 @@ const usuarioSchema = mongoose.Schema({
     type: String,
     enum: ['admin', 'user'],
     default: 'user',
+  },
+  aprobado: {
+    type: Boolean,
+    default: false
   },
   ofertasHechas: [
     {

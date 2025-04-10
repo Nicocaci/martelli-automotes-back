@@ -45,6 +45,22 @@ class UsuarioController {
     }
   }
 
+  // Cambiar el estado de "aprobado"
+async cambiarEstadoAprobado(req, res) {
+  try {
+    const { id } = req.params;
+    const usuario = await UsuarioModel.findById(id);
+    if (!usuario) return res.status(404).json({ message: 'Usuario no encontrado' });
+
+    usuario.aprobado = !usuario.aprobado; // toggle
+    await usuario.save();
+
+    res.json({ message: 'Estado actualizado', aprobado: usuario.aprobado });
+  } catch (error) {
+    res.status(500).json({ message: 'Error al cambiar el estado: ' + error.message });
+  }
+}
+
   // Actualizar un usuario por ID
   async actualizarUsuario(req, res) {
     try {
@@ -76,7 +92,7 @@ class UsuarioController {
 
 
   async register(req, res) {
-    const { agencia,dni , email, password, telefono, direccion } = req.body;
+    const {nombre, razonSocial, agencia,dni , email, password, telefono, direccion } = req.body;
     try {
       const existeUsuario = await UsuarioModel.findOne({ email });
       if (existeUsuario) {
@@ -86,6 +102,8 @@ class UsuarioController {
       const hashPassword = bcrypt.hashSync(password, 10);
 
       const nuevoUsuario = await UsuarioService.crearUsuario({
+        nombre,
+        razonSocial,
         agencia,
         dni,
         email,
@@ -103,48 +121,52 @@ class UsuarioController {
   }
 
   async loginUsuario(req, res) {
-
     try {
       const { email, password } = req.body;
       const usuario = await UsuarioModel.findOne({ email });
+  
       if (!usuario) {
-        return res.status(404).json({ message: "Usuario no encontrado" })
+        return res.status(404).json({ message: "Usuario no encontrado" });
       }
-
-      //Verificamos password
-
+  
+      // ✅ Validamos si está aprobado
+      if (!usuario.aprobado) {
+        return res.status(403).json({ message: "Tu cuenta aún no fue aprobada por un administrador." });
+      }
+  
+      // 🔐 Verificamos password
       const esValida = await bcrypt.compare(password, usuario.password);
       if (!esValida) {
         return res.status(401).json({ message: "Contraseña incorrecta" });
       }
-
-      //Generamos Token
-
-
+  
+      // 🪪 Generamos token
       const token = generateToken({
         _id: usuario._id,
         email: usuario.email,
         agencia: usuario.agencia,
         rol: usuario.rol
-      })
-      res.cookie('acces_token', token, {
-        httpOnly: false,  // 🔥 Esto evita que JS en el navegador acceda a la cookie
-        secure: true,    // 🔥 Asegura que solo se envíe por HTTPS (funciona en Railway)
-        sameSite: "None", // 🔥 Importante para que funcione en diferentes dominios
-        maxAge: 24 * 60 * 60 * 1000, // 24 horas
-        path: '/',
-        domain: ".railway.app", // Disponible en toda la app
       });
-
+  
+      res.cookie('acces_token', token, {
+        httpOnly: false,
+        secure: true,
+        sameSite: "None",
+        maxAge: 24 * 60 * 60 * 1000,
+        path: '/',
+        domain: ".railway.app",
+      });
+  
       return res.status(201).json({
         message: 'Login correcto',
         token
       });
-
+  
     } catch (error) {
-      res.status(500).json({ message: 'Error de Login' + error.message })
+      res.status(500).json({ message: 'Error de Login: ' + error.message });
     }
   }
+  
 
   async logOut(req, res) {
     res.clearCookie('acces_token', {

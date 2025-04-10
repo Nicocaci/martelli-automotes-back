@@ -8,8 +8,10 @@ router.post('/register', UsuarioController.register);
 router.post('/login', UsuarioController.loginUsuario);
 router.post('/logout', UsuarioController.logOut);
 router.get('/:id', UsuarioController.obtenerUsuarioPorId);
-router.get('/usuarios', UsuarioController.obtenerUsuarios);
+router.get('/', UsuarioController.obtenerUsuarios);
 router.put('/:id', UsuarioController.actualizarUsuario);
 router.delete('/:id',UsuarioController.eliminarUsuario);
+router.patch('/:id/aprobado', UsuarioController.cambiarEstadoAprobado);
+
 
 export default router;
