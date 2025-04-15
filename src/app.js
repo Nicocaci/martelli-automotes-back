@@ -16,7 +16,7 @@ const server = createServer(app);
 const io = new Server(server, {
     cors: {
         origin: "https://martelli-automotores-front-dev-production.up.railway.app",
-        //"http://localhost:5173",
+                //"http://localhost:5173",
         credentials: true,
     }
 });
