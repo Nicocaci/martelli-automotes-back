@@ -29,6 +29,7 @@ mongoose.connect(process.env.MONGO_URL)
     .catch((err) => console.error("❌ Error al conectar con MongoDB:", err));
 
 app.use(express.json());
+app.use('/uploads', express.static('uploads'));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(cors({

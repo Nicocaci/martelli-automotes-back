@@ -7,15 +7,39 @@ import { enviarCorreoGanador } from '../service/email-service.js';
 
 class SubastaController {
   // Crear una nueva subasta
-  async crearSubasta(req, res) {
-    try {
-      const subastaData = req.body;
-      const nuevaSubasta = await SubastaService.crearSubasta(subastaData);
-      res.status(201).send(nuevaSubasta);
-    } catch (error) {
-      res.status(500).json({ message: 'Error al crear subasta: ' + error.message });
+// SubastaController.js
+async crearSubasta(req, res) {
+  try {
+    const { nombre, motor, modelo, ubicacion, descripcion, precioInicial, fechaFin } = req.body;
+
+    const imagenes = req.files?.map(file => file.filename);
+
+    if (!imagenes || imagenes.length === 0) {
+      return res.status(400).json({ message: 'Debe subir al menos una imagen del auto' });
     }
+
+    const nuevaSubasta = await SubastaModel.create({
+      autos: {
+        nombre,
+        motor,
+        modelo,
+        ubicacion,
+        descripcion,
+        img: imagenes, // Array de strings
+      },
+      precioInicial: Number(precioInicial),
+      fechaFin,
+      ofertadores: []
+    });
+
+    res.status(201).json(nuevaSubasta);
+  } catch (error) {
+    console.error('Error al crear subasta:', error);
+    res.status(500).json({ message: 'Error al crear subasta: ' + error.message });
   }
+}
+
+
 
   // Obtener una subasta por su ID
   async obtenerSubastaPorId(req, res) {

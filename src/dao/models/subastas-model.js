@@ -19,8 +19,13 @@ const subastaSchema = new mongoose.Schema({
       required: true
     },
     img: {
-      type: String,
+      type: [String], // array de strings
+      default: [],
     },
+    descripcion: {
+      type: String,
+      required:true,
+    }
   },
   fechaInicio: {
     type: Date,
