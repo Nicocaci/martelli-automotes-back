@@ -96,7 +96,7 @@ async cambiarEstadoAprobado(req, res) {
     try {
       const existeUsuario = await UsuarioModel.findOne({ email });
       if (existeUsuario) {
-        return res.status(400).send('El email ya esta registrado');
+        return res.status(400).json({ message: 'El email ya está registrado' });
       }
 
       const hashPassword = bcrypt.hashSync(password, 10);
