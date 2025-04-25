@@ -25,6 +25,10 @@ const subastaSchema = new mongoose.Schema({
     descripcion: {
       type: String,
       required:true,
+    },
+    peritaje: {
+      type: [String],
+      default: [],
     }
   },
   fechaInicio: {

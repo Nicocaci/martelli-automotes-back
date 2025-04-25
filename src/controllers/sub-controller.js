@@ -12,7 +12,9 @@ async crearSubasta(req, res) {
   try {
     const { nombre, motor, modelo, ubicacion, descripcion, precioInicial, fechaFin } = req.body;
 
-    const imagenes = req.files?.map(file => file.filename);
+    const imagenes = req.files?.img?.map(file => file.filename) || [];
+    const peritajes = req.files?.peritaje?.map(file => file.filename) || [];
+
 
     if (!imagenes || imagenes.length === 0) {
       return res.status(400).json({ message: 'Debe subir al menos una imagen del auto' });
@@ -26,6 +28,7 @@ async crearSubasta(req, res) {
         ubicacion,
         descripcion,
         img: imagenes, // Array de strings
+        peritaje: peritajes,
       },
       precioInicial: Number(precioInicial),
       fechaFin,
@@ -120,6 +123,12 @@ async agregarOferta(req, res) {
       highestBidder: highestOffer.usuario,
       tiempoExtraRestante: subasta.tiempoExtraRestante,
       finalizada: subasta.finalizada
+    });
+
+    console.log("Enviando evento 'nueva-oferta-realizada' para el usuario:", highestOffer.usuario._id || highestOffer.usuario);
+
+    io.emit("nueva-oferta-realizada", {
+      usuarioId: highestOffer.usuario._id?.toString() || highestOffer.usuario.toString()
     });
 
     res.status(200).json(subasta);

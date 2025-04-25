@@ -1,6 +1,20 @@
 import SubastaRepository from '../repository/sub-repository.js';
 import SubastaModel from '../dao/models/subastas-model.js';
 import UsuarioModel from '../dao/models/usuario-model.js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const uploadsDir = path.join(__dirname, "../../uploads");
+
+function eliminarArchivoSiExiste(nombreArchivo) {
+  const rutaCompleta = path.join(uploadsDir, nombreArchivo);
+  if (fs.existsSync(rutaCompleta)) {
+    fs.unlinkSync(rutaCompleta);
+  }
+}
 
 class SubastaService {
   // 🔹 Crear una nueva subasta
@@ -47,7 +61,20 @@ class SubastaService {
       const subasta = await SubastaModel.findById(subastaId);
       if (!subasta) return null;
 
+      // 🔸 Eliminar imágenes de autos
+      if (subasta.autos?.img?.length > 0) {
+        subasta.autos.img.forEach(eliminarArchivoSiExiste);
+      }
+
+      // 🔸 Eliminar imágenes de peritaje si existen
+      if (subasta.autos?.peritaje?.length > 0) {
+        subasta.autos.peritaje.forEach(eliminarArchivoSiExiste);
+      }
+
+      // 🔸 Eliminar subasta de la base de datos
       await SubastaModel.findByIdAndDelete(subastaId);
+
+      // 🔸 Limpiar referencias en usuarios
       await UsuarioModel.updateMany(
         { "ofertasHechas.subasta": subastaId },
         { $pull: { ofertasHechas: { subasta: subastaId } } }
@@ -61,42 +88,42 @@ class SubastaService {
 
   // 🔹 Agregar o actualizar oferta en una subasta
   async agregarOferta(subastaId, ofertaData) {
-    try {
-      const { usuario, monto } = ofertaData;
+  try {
+    const { usuario, monto } = ofertaData;
 
-      // ✅ Verificar si el usuario existe
-      const usuarioExistente = await UsuarioModel.findById(usuario);
-      if (!usuarioExistente) throw new Error("El usuario no existe");
+    // ✅ Verificar si el usuario existe
+    const usuarioExistente = await UsuarioModel.findById(usuario);
+    if (!usuarioExistente) throw new Error("El usuario no existe");
 
-      // ✅ Verificar si la subasta existe
-      const subasta = await SubastaModel.findById(subastaId);
-      if (!subasta) throw new Error("Subasta no encontrada");
+    // ✅ Verificar si la subasta existe
+    const subasta = await SubastaModel.findById(subastaId);
+    if (!subasta) throw new Error("Subasta no encontrada");
 
-      // ✅ Revisar si el usuario ya ofertó
-      const ofertaExistente = subasta.ofertadores.find(o => o.usuario.toString() === usuario);
-      if (ofertaExistente) {
-        ofertaExistente.monto = monto; // 🔹 Actualizar monto
-      } else {
-        subasta.ofertadores.push({ usuario, monto }); // 🔹 Nueva oferta
-      }
-
-      await subasta.save();
-
-      // ✅ Actualizar las ofertas en el perfil del usuario
-      const ofertaUsuario = usuarioExistente.ofertasHechas.find(o => o.subasta.toString() === subastaId);
-      if (ofertaUsuario) {
-        ofertaUsuario.monto = monto;
-      } else {
-        usuarioExistente.ofertasHechas.push({ subasta: subastaId, monto });
-      }
-
-      await usuarioExistente.save();
-
-      return await subasta.populate("ofertadores.usuario", "agencia"); // ✅ Devolver con nombres
-    } catch (error) {
-      throw new Error(`Error al agregar la oferta: ${error.message}`);
+    // ✅ Revisar si el usuario ya ofertó
+    const ofertaExistente = subasta.ofertadores.find(o => o.usuario.toString() === usuario);
+    if (ofertaExistente) {
+      ofertaExistente.monto = monto; // 🔹 Actualizar monto
+    } else {
+      subasta.ofertadores.push({ usuario, monto }); // 🔹 Nueva oferta
     }
+
+    await subasta.save();
+
+    // ✅ Actualizar las ofertas en el perfil del usuario
+    const ofertaUsuario = usuarioExistente.ofertasHechas.find(o => o.subasta.toString() === subastaId);
+    if (ofertaUsuario) {
+      ofertaUsuario.monto = monto;
+    } else {
+      usuarioExistente.ofertasHechas.push({ subasta: subastaId, monto });
+    }
+
+    await usuarioExistente.save();
+
+    return await subasta.populate("ofertadores.usuario", "agencia"); // ✅ Devolver con nombres
+  } catch (error) {
+    throw new Error(`Error al agregar la oferta: ${error.message}`);
   }
+}
 }
 
 export default new SubastaService();

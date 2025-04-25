@@ -6,7 +6,10 @@ import upload from "../config/multerConfig.js"; // ⬅️ Importá la config de 
 const router = express.Router();
 
 // 👉 Ruta modificada para permitir subida de imagen
-router.post('/', upload.array("img", 5), SubastaController.crearSubasta); 
+router.post('/', upload.fields([
+    { name: 'img', maxCount: 10 },
+    { name: 'peritaje', maxCount: 10 }
+]), SubastaController.crearSubasta);
 
 router.get('/:id', SubastaController.obtenerSubastaPorId);
 router.get('/', SubastaController.obtenerSubastas);
