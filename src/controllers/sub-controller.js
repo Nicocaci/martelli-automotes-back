@@ -10,7 +10,7 @@ class SubastaController {
 // SubastaController.js
 async crearSubasta(req, res) {
   try {
-    const { nombre, motor, modelo, ubicacion, descripcion, precioInicial, fechaFin } = req.body;
+    const { nombre, motor, modelo,kilometros , ubicacion, descripcion, precioInicial, fechaFin } = req.body;
 
     const imagenes = req.files?.img?.map(file => file.filename) || [];
     const peritajes = req.files?.peritaje?.map(file => file.filename) || [];
@@ -25,6 +25,7 @@ async crearSubasta(req, res) {
         nombre,
         motor,
         modelo,
+        kilometros,
         ubicacion,
         descripcion,
         img: imagenes, // Array de strings
@@ -32,7 +33,8 @@ async crearSubasta(req, res) {
       },
       precioInicial: Number(precioInicial),
       fechaFin,
-      ofertadores: []
+      ofertadores: [],
+      finalizada:false,
     });
 
     res.status(201).json(nuevaSubasta);
@@ -106,7 +108,7 @@ async agregarOferta(req, res) {
 
     // Lógica para agregar la oferta
     const subasta = await SubastaService.agregarOferta(subastaId, ofertaData);
-
+    
     // Si la subasta tiene tiempo extra y no está finalizada, reiniciamos el tiempo extra
     if (subasta.tiempoExtraRestante !== null && !subasta.finalizada) {
       subasta.tiempoExtraRestante = 60; // Reiniciamos a 60 segundos
@@ -125,7 +127,7 @@ async agregarOferta(req, res) {
       finalizada: subasta.finalizada
     });
 
-    console.log("Enviando evento 'nueva-oferta-realizada' para el usuario:", highestOffer.usuario._id || highestOffer.usuario);
+    //console.log("Enviando evento 'nueva-oferta-realizada' para el usuario:", highestOffer.usuario._id || highestOffer.usuario);
 
     io.emit("nueva-oferta-realizada", {
       usuarioId: highestOffer.usuario._id?.toString() || highestOffer.usuario.toString()
@@ -142,7 +144,7 @@ async agregarOferta(req, res) {
 async finalizarSubasta(req, res) {
   const { id } = req.params;
   try {
-    const subasta = await SubastaModel.findById(id);
+    const subasta = await SubastaModel.findById(id).populate("autos");
     if (!subasta) {
       return res.status(404).json({ message: "Subasta no encontrada" });
     }
@@ -172,7 +174,7 @@ async finalizarSubasta(req, res) {
 
     // 📩 Solo enviar email si no fue enviado antes y hay un ganador
     if (!subasta.emailEnviado && usuarioGanador) {
-      await enviarCorreoGanador(emailGanador, subasta._id);
+      await enviarCorreoGanador(emailGanador,  subasta.autos.nombre);
       subasta.emailEnviado = true; // 🔥 Marcamos como enviado
     }
 

@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
     },
 });
 
-export const enviarCorreoGanador = async (email, subastaId) => {
+export const enviarCorreoGanador = async (email,nombreAuto) => {
     try {
         await transporter.sendMail({
             from: "nicko.caci@gmail.com",
@@ -18,7 +18,7 @@ export const enviarCorreoGanador = async (email, subastaId) => {
             subject: "¡Felicitaciones! Ganaste la subastas",
             html: `
                 <h1>¡Felicidades!</h1>
-                <p>Has ganado la subasta <strong>${subastaId}</strong>.</p>
+                <p>Has ganado la subasta <strong>${nombreAuto}</strong>.</p>
                 <p>Pronto nos pondremos en contacto para finalizar la compra.</p>
             `
         });

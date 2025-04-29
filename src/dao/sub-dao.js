@@ -1,7 +1,7 @@
 import SubastaModel from './models/subastas-model.js';
 
 class SubastaDAO {
-  async crearSubasta(subastaData) {
+  async   crearSubasta(subastaData) {
     try {
       const nuevaSubasta = new SubastaModel(subastaData);
       await nuevaSubasta.save();

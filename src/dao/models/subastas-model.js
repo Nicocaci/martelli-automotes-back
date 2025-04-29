@@ -14,6 +14,11 @@ const subastaSchema = new mongoose.Schema({
       type: String,
       required: true
     },
+    kilometros: {
+      type: Number,
+      required: true,
+    }
+    ,
     ubicacion: {
       type: String,
       required: true
