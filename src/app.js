@@ -18,7 +18,7 @@ const server = createServer(app);
 const io = new Server(server, {
     cors: {
         origin: "https://www.autosmartapp.com",
-                //"http://localhost:5173",
+        //"http://localhost:5173",
         credentials: true,
     }
 });
@@ -31,13 +31,23 @@ mongoose.connect(process.env.MONGO_URL)
     .catch((err) => console.error("❌ Error al conectar con MongoDB:", err));
 
 
+const allowedOrigins = [
+    "https://www.autosmartapp.com",
+];
+
 app.use(cors({
-    origin: "https://www.autosmartapp.com",
-            //"http://localhost:5173",
+    origin: function (origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, origin); // solo devuelve exactamente https://www.autosmartapp.com
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
 }));
+
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 app.use(express.urlencoded({ extended: true }));
