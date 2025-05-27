@@ -12,11 +12,13 @@ import cookieParser from "cookie-parser";
 dotenv.config();
 
 const app = express();
+
+// CONFIGURACION DE SOCKET
 const server = createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: "https://martelli-automotores-front-dev-production.up.railway.app",
-                //"http://localhost:5173",
+        origin: //"https://martelli-automotores-front-dev-production.up.railway.app",
+                "http://localhost:5173",
         credentials: true,
     }
 });
@@ -33,7 +35,7 @@ app.use('/uploads', express.static('uploads'));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(cors({
-    origin: "https://martelli-automotores-front-dev-production.up.railway.app",
+    origin: "https://www.autosmartapp.com/",
             //"http://localhost:5173",
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],

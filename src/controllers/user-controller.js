@@ -154,7 +154,7 @@ async cambiarEstadoAprobado(req, res) {
         sameSite: "None",
         maxAge: 24 * 60 * 60 * 1000,
         path: '/',
-        domain: ".railway.app",
+        domain: ".autosmartapp.com",
       });
   
       return res.status(201).json({
@@ -173,7 +173,7 @@ async cambiarEstadoAprobado(req, res) {
       httpOnly: true,
       secure: true,
       sameSite: "None",
-      domain: ".railway.app",
+      domain: ".autosmartapp.com",
       path: "/"
     });
     res.status(200).json({ message: "Logout exitoso" });
