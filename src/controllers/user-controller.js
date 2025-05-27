@@ -46,20 +46,20 @@ class UsuarioController {
   }
 
   // Cambiar el estado de "aprobado"
-async cambiarEstadoAprobado(req, res) {
-  try {
-    const { id } = req.params;
-    const usuario = await UsuarioModel.findById(id);
-    if (!usuario) return res.status(404).json({ message: 'Usuario no encontrado' });
+  async cambiarEstadoAprobado(req, res) {
+    try {
+      const { id } = req.params;
+      const usuario = await UsuarioModel.findById(id);
+      if (!usuario) return res.status(404).json({ message: 'Usuario no encontrado' });
 
-    usuario.aprobado = !usuario.aprobado; // toggle
-    await usuario.save();
+      usuario.aprobado = !usuario.aprobado; // toggle
+      await usuario.save();
 
-    res.json({ message: 'Estado actualizado', aprobado: usuario.aprobado });
-  } catch (error) {
-    res.status(500).json({ message: 'Error al cambiar el estado: ' + error.message });
+      res.json({ message: 'Estado actualizado', aprobado: usuario.aprobado });
+    } catch (error) {
+      res.status(500).json({ message: 'Error al cambiar el estado: ' + error.message });
+    }
   }
-}
 
   // Actualizar un usuario por ID
   async actualizarUsuario(req, res) {
@@ -92,7 +92,7 @@ async cambiarEstadoAprobado(req, res) {
 
 
   async register(req, res) {
-    const {nombre, razonSocial, agencia,dni , email, password, telefono, direccion } = req.body;
+    const { nombre, razonSocial, agencia, dni, email, password, telefono, direccion } = req.body;
     try {
       const existeUsuario = await UsuarioModel.findOne({ email });
       if (existeUsuario) {
@@ -124,22 +124,22 @@ async cambiarEstadoAprobado(req, res) {
     try {
       const { email, password } = req.body;
       const usuario = await UsuarioModel.findOne({ email });
-  
+
       if (!usuario) {
         return res.status(404).json({ message: "Usuario no encontrado" });
       }
-  
+
       // ✅ Validamos si está aprobado
       if (!usuario.aprobado) {
         return res.status(403).json({ message: "Tu cuenta aún no fue aprobada por un administrador." });
       }
-  
+
       // 🔐 Verificamos password
       const esValida = await bcrypt.compare(password, usuario.password);
       if (!esValida) {
         return res.status(401).json({ message: "Contraseña incorrecta" });
       }
-  
+
       // 🪪 Generamos token
       const token = generateToken({
         _id: usuario._id,
@@ -147,33 +147,33 @@ async cambiarEstadoAprobado(req, res) {
         agencia: usuario.agencia,
         rol: usuario.rol
       });
-  
+
       res.cookie('acces_token', token, {
         httpOnly: false,
         secure: true,
         sameSite: "None",
         maxAge: 24 * 60 * 60 * 1000,
         path: '/',
-        //domain: ".autosmartapp.com",
+        domain: ".autosmartapp.com",
       });
-  
+
       return res.status(201).json({
         message: 'Login correcto',
         token
       });
-  
+
     } catch (error) {
       res.status(500).json({ message: 'Error de Login: ' + error.message });
     }
   }
-  
+
 
   async logOut(req, res) {
     res.clearCookie('acces_token', {
-      httpOnly: true,
+      httpOnly: false,
       secure: true,
       sameSite: "None",
-      //domain: ".autosmartapp.com",
+      domain: ".autosmartapp.com",
       path: "/"
     });
     res.status(200).json({ message: "Logout exitoso" });
