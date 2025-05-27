@@ -148,13 +148,12 @@ class UsuarioController {
         rol: usuario.rol
       });
 
-      res.cookie('acces_token', token, {
-        httpOnly: false,
+      res.cookie('access_token', token, {
+        httpOnly: true,
         secure: true,
         sameSite: "None",
         maxAge: 24 * 60 * 60 * 1000,
         path: '/',
-        domain: 'www.autosmartapp.com',
       });
 
       return res.status(201).json({
@@ -169,11 +168,10 @@ class UsuarioController {
 
 
   async logOut(req, res) {
-    res.clearCookie('acces_token', {
-      httpOnly: false,
+    res.clearCookie('access_token', {
+      httpOnly: true,
       secure: true,
       sameSite: "None",
-      domain: 'www.autosmartapp.com',
       path: "/"
     });
     res.status(200).json({ message: "Logout exitoso" });
