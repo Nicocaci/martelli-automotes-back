@@ -33,6 +33,7 @@ mongoose.connect(process.env.MONGO_URL)
 
 const allowedOrigins = [
     "https://www.autosmartapp.com",
+    "https://api.autosmartapp.com" 
 ];
 
 app.use(cors({
