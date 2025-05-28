@@ -32,22 +32,19 @@ mongoose.connect(process.env.MONGO_URL)
 
 
 const allowedOrigins = [
-    "https://www.autosmartapp.com",
-    "https://api.autosmartapp.com",
-    "http://localhost:5173" 
+    'https://www.autosmartapp.com',
+    'https://autosmartapp.com'
 ];
 
 app.use(cors({
     origin: function (origin, callback) {
         if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, origin); // solo devuelve exactamente https://www.autosmartapp.com
+            callback(null, true);
         } else {
-            callback(new Error("Not allowed by CORS"));
+            callback(new Error('Not allowed by CORS'));
         }
     },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true
 }));
 
 app.use(express.json());
