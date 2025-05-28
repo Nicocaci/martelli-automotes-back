@@ -47,6 +47,14 @@ app.use(cors({
     credentials: true
 }));
 
+
+app.use((req, res, next) => {
+    const host = req.headers.host;
+    if (host && host !== 'api.autosmartapp.com') {
+        return res.redirect(301, `https://api.autosmartapp.com${req.originalUrl}`);
+    }
+    next();
+});
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 app.use(express.urlencoded({ extended: true }));
