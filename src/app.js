@@ -17,8 +17,8 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: "https://www.autosmartapp.com",
-        //"http://localhost:5173",
+        origin: //"https://www.autosmartapp.com",
+        "http://localhost:5173",
         credentials: true,
     }
 });
@@ -33,7 +33,8 @@ mongoose.connect(process.env.MONGO_URL)
 
 const allowedOrigins = [
     "https://www.autosmartapp.com",
-    "https://api.autosmartapp.com" 
+    "https://api.autosmartapp.com",
+    "http://localhost:5173" 
 ];
 
 app.use(cors({
