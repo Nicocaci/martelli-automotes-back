@@ -149,7 +149,7 @@ class UsuarioController {
       });
 
       res.cookie('access_token', token, {
-        httpOnly: true,
+        httpOnly: false,
         secure: true,
         sameSite: "None",
         maxAge: 24 * 60 * 60 * 1000,
@@ -177,7 +177,20 @@ class UsuarioController {
     });
     res.status(200).json({ message: "Logout exitoso" });
   }
+
+  async verificarToken(req, res) {
+  try {
+    // `req.user` es seteado por el middleware si el token es válido
+    return res.status(200).json({
+      message: "Autenticado correctamente",
+      user: req.user
+    });
+  } catch (error) {
+    return res.status(500).json({ message: 'Error verificando sesión: ' + error.message });
+  }
 }
+}
+
 
 
 export default new UsuarioController();
