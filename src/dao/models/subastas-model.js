@@ -39,44 +39,45 @@ const subastaSchema = new mongoose.Schema({
   fechaInicio: {
     type: Date,
     default: () => {
-      const now = new Date();
-      return new Date(now.getTime() - now.getTimezoneOffset() * 60000); // hora local como si fuera UTC
+      const now = new Date(); // UTC por defecto
+      // UTC-3: restar 3 horas = 3 * 60 * 60 * 1000 ms
+      return new Date(now.getTime() - (3 * 60 * 60 * 1000));
     }
   },
   fechaFin: {
-    type: Date,
-    required: true
-  },
+  type: Date,
+  required: true
+},
   precioInicial: {
-    type: Number,
-    required: true
-  },
+  type: Number,
+  required: true
+},
   ofertadores: [
-    {
-      usuario: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "usuarios",
-        required: true
-      },
-      monto: {
-        type: Number,
-        required: true
-      }
+  {
+    usuario: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "usuarios",
+      required: true
+    },
+    monto: {
+      type: Number,
+      required: true
     }
-  ],
+  }
+],
   finalizada: {
-    type: Boolean,
-    default: false // Nueva propiedad para saber si la subasta terminó
-  },
+  type: Boolean,
+  default: false // Nueva propiedad para saber si la subasta terminó
+},
   tiempoExtraRestante: {
-    type: Number,
-    default: null
-  },
+  type: Number,
+  default: null
+},
   ganador: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "usuarios",
-    default: null
-  },
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "usuarios",
+  default: null
+},
   emailEnviado: { type: Boolean, default: false } // 🔥 Nuevo campo
 });
 
