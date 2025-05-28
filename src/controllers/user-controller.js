@@ -154,7 +154,7 @@ class UsuarioController {
         sameSite: "None",
         maxAge: 24 * 60 * 60 * 1000,
         path: '/',
-        domain: "https://www.autosmartapp.com"
+        domain: ".autosmartapp.com"
         
       });
 
