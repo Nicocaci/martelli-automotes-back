@@ -36,10 +36,13 @@ const subastaSchema = new mongoose.Schema({
       default: [],
     }
   },
-  fechaInicio: {
-    type: Date,
-    default: () => Date.now()
-  },
+fechaInicio: {
+  type: Date,
+  default: () => {
+    const now = new Date();
+    return new Date(now.getTime() - now.getTimezoneOffset() * 60000); // hora local como si fuera UTC
+  }
+},
   fechaFin: {
     type: Date,
     required: true
