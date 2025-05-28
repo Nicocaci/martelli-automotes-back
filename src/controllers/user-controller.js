@@ -170,10 +170,11 @@ class UsuarioController {
 
   async logOut(req, res) {
     res.clearCookie('access_token', {
-      httpOnly: true,
+      httpOnly: false,
       secure: true,
       sameSite: "None",
-      path: "/"
+      path: "/",
+      domain: '.autosmartapp.com'
     });
     res.status(200).json({ message: "Logout exitoso" });
   }
