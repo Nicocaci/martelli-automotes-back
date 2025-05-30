@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
 export const enviarCorreoGanador = async (email,nombreAuto) => {
     try {
         await transporter.sendMail({
-            from: "nicko.caci@gmail.com",
+            from: "autosmart025@gmail.com",
             to: email,
             subject: "¡Felicitaciones! Ganaste la subastas",
             html: `
