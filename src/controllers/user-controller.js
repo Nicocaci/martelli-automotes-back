@@ -180,6 +180,7 @@ class UsuarioController {
         sameSite: "none",
         maxAge: 24 * 60 * 60 * 1000,
         path: "/",
+        domain: ".railway.app",
       });
 
       return res.status(201).json({
@@ -197,6 +198,7 @@ class UsuarioController {
       secure: true,
       sameSite: "none",
       path: "/",
+      domain: ".railway.app",
     });
 
     res.status(200).json({
