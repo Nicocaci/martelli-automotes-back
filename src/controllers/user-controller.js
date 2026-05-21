@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import UsuarioModel from "../dao/models/usuario-model.js";
 import generateToken from "../utils/jsonwebtoken.js";
-import cookieParser from "cookie-parser";
+
 
 class UsuarioController {
   // Crear un nuevo usuario
@@ -174,18 +174,23 @@ class UsuarioController {
         rol: usuario.rol,
       });
 
+      const isProduction = process.env.NODE_ENV === "production";
+
+      console.log("🍪 seteando cookie...");
+      console.log("isProduction:", isProduction);
+
       res.cookie("access_token", token, {
-        httpOnly: false,
-        secure: false,
-        sameSite: "none",
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax",
         maxAge: 24 * 60 * 60 * 1000,
         path: "/",
-        domain: ".railway.app",
       });
 
-      return res.status(201).json({
+      console.log("🍪 cookie seteada");
+
+      return res.status(200).json({
         message: "Login correcto",
-        token,
       });
     } catch (error) {
       res.status(500).json({ message: "Error de Login: " + error.message });
