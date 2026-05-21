@@ -1,13 +1,9 @@
-import UsuarioService from '../service/user-service.js';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import UsuarioModel from '../dao/models/usuario-model.js';
-import generateToken from '../utils/jsonwebtoken.js';
-import cookieParser from 'cookie-parser';
-
-
-
-
+import UsuarioService from "../service/user-service.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import UsuarioModel from "../dao/models/usuario-model.js";
+import generateToken from "../utils/jsonwebtoken.js";
+import cookieParser from "cookie-parser";
 
 class UsuarioController {
   // Crear un nuevo usuario
@@ -17,7 +13,9 @@ class UsuarioController {
       const nuevoUsuario = await UsuarioService.crearUsuario(userData);
       res.status(201).json(nuevoUsuario);
     } catch (error) {
-      res.status(500).json({ message: 'Error al crear usuario: ' + error.message });
+      res
+        .status(500)
+        .json({ message: "Error al crear usuario: " + error.message });
     }
   }
 
@@ -27,11 +25,13 @@ class UsuarioController {
       const usuarioId = req.params.id;
       const usuario = await UsuarioService.obtenerUsuarioPorId(usuarioId);
       if (!usuario) {
-        return res.status(404).json({ message: 'Usuario no encontrado' });
+        return res.status(404).json({ message: "Usuario no encontrado" });
       }
       res.json(usuario);
     } catch (error) {
-      res.status(500).json({ message: 'Error al obtener usuario: ' + error.message });
+      res
+        .status(500)
+        .json({ message: "Error al obtener usuario: " + error.message });
     }
   }
 
@@ -41,7 +41,9 @@ class UsuarioController {
       const usuarios = await UsuarioService.obtenerUsuarios();
       res.json(usuarios);
     } catch (error) {
-      res.status(500).json({ message: 'Error al obtener usuarios: ' + error.message });
+      res
+        .status(500)
+        .json({ message: "Error al obtener usuarios: " + error.message });
     }
   }
 
@@ -50,14 +52,17 @@ class UsuarioController {
     try {
       const { id } = req.params;
       const usuario = await UsuarioModel.findById(id);
-      if (!usuario) return res.status(404).json({ message: 'Usuario no encontrado' });
+      if (!usuario)
+        return res.status(404).json({ message: "Usuario no encontrado" });
 
       usuario.aprobado = !usuario.aprobado; // toggle
       await usuario.save();
 
-      res.json({ message: 'Estado actualizado', aprobado: usuario.aprobado });
+      res.json({ message: "Estado actualizado", aprobado: usuario.aprobado });
     } catch (error) {
-      res.status(500).json({ message: 'Error al cambiar el estado: ' + error.message });
+      res
+        .status(500)
+        .json({ message: "Error al cambiar el estado: " + error.message });
     }
   }
 
@@ -66,13 +71,20 @@ class UsuarioController {
     try {
       const usuarioId = req.params.id;
       const userData = req.body;
-      const usuarioActualizado = await UsuarioService.actualizarUsuario(usuarioId, userData);
+      const usuarioActualizado = await UsuarioService.actualizarUsuario(
+        usuarioId,
+        userData,
+      );
       if (!usuarioActualizado) {
-        return res.status(404).json({ message: 'Usuario no encontrado para actualizar' });
+        return res
+          .status(404)
+          .json({ message: "Usuario no encontrado para actualizar" });
       }
       res.status(200).json(usuarioActualizado);
     } catch (error) {
-      res.status(500).json({ message: 'Error al actualizar usuario: ' + error.message });
+      res
+        .status(500)
+        .json({ message: "Error al actualizar usuario: " + error.message });
     }
   }
 
@@ -82,21 +94,33 @@ class UsuarioController {
       const usuarioId = req.params.id;
       const usuarioEliminado = await UsuarioService.eliminarUsuario(usuarioId);
       if (!usuarioEliminado) {
-        return res.status(404).json({ message: 'Usuario no encontrado para eliminar' });
+        return res
+          .status(404)
+          .json({ message: "Usuario no encontrado para eliminar" });
       }
-      res.status(204).json({ message: 'Usuario eliminado correctamente' });  // Usando 204 No Content
+      res.status(204).json({ message: "Usuario eliminado correctamente" }); // Usando 204 No Content
     } catch (error) {
-      res.status(500).json({ message: 'Error al eliminar usuario: ' + error.message });
+      res
+        .status(500)
+        .json({ message: "Error al eliminar usuario: " + error.message });
     }
   }
 
-
   async register(req, res) {
-    const { nombre, razonSocial, agencia, dni, email, password, telefono, direccion } = req.body;
+    const {
+      nombre,
+      razonSocial,
+      agencia,
+      dni,
+      email,
+      password,
+      telefono,
+      direccion,
+    } = req.body;
     try {
       const existeUsuario = await UsuarioModel.findOne({ email });
       if (existeUsuario) {
-        return res.status(400).json({ message: 'El email ya está registrado' });
+        return res.status(400).json({ message: "El email ya está registrado" });
       }
 
       const hashPassword = bcrypt.hashSync(password, 10);
@@ -109,14 +133,14 @@ class UsuarioController {
         email,
         telefono,
         password: hashPassword,
-        direccion
+        direccion,
       });
       return res.status(201).json({
-        message: 'Usuario registrado con éxito',
+        message: "Usuario registrado con éxito",
         usuario: nuevoUsuario,
       });
     } catch (error) {
-      res.status(500).json({ message: 'Error del servidor' + error })
+      res.status(500).json({ message: "Error del servidor" + error });
     }
   }
 
@@ -131,7 +155,11 @@ class UsuarioController {
 
       // ✅ Validamos si está aprobado
       if (!usuario.aprobado) {
-        return res.status(403).json({ message: "Tu cuenta aún no fue aprobada por un administrador." });
+        return res
+          .status(403)
+          .json({
+            message: "Tu cuenta aún no fue aprobada por un administrador.",
+          });
       }
 
       // 🔐 Verificamos password
@@ -145,53 +173,51 @@ class UsuarioController {
         _id: usuario._id,
         email: usuario.email,
         agencia: usuario.agencia,
-        rol: usuario.rol
+        rol: usuario.rol,
       });
 
-      res.cookie('access_token', token, {
+      res.cookie("access_token", token, {
         httpOnly: false,
         secure: true,
         sameSite: "None",
         maxAge: 24 * 60 * 60 * 1000,
-        path: '/',
-        domain: '.autosmartapp.com'
+        path: "/",
+        domain: ".autosmartapp.com",
       });
 
       return res.status(201).json({
-        message: 'Login correcto',
-        token
+        message: "Login correcto",
+        token,
       });
-
     } catch (error) {
-      res.status(500).json({ message: 'Error de Login: ' + error.message });
+      res.status(500).json({ message: "Error de Login: " + error.message });
     }
   }
 
-
   async logOut(req, res) {
-    res.clearCookie('access_token', {
+    res.clearCookie("access_token", {
       httpOnly: false,
       secure: true,
       sameSite: "None",
       path: "/",
-      domain: '.autosmartapp.com'
+      domain: ".autosmartapp.com",
     });
     res.status(200).json({ message: "Logout exitoso" });
   }
 
   async verificarToken(req, res) {
-  try {
-    // `req.user` es seteado por el middleware si el token es válido
-    return res.status(200).json({
-      message: "Autenticado correctamente",
-      user: req.user
-    });
-  } catch (error) {
-    return res.status(500).json({ message: 'Error verificando sesión: ' + error.message });
+    try {
+      // `req.user` es seteado por el middleware si el token es válido
+      return res.status(200).json({
+        message: "Autenticado correctamente",
+        user: req.user,
+      });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ message: "Error verificando sesión: " + error.message });
+    }
   }
 }
-}
-
-
 
 export default new UsuarioController();
