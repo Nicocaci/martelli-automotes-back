@@ -176,11 +176,10 @@ class UsuarioController {
 
       res.cookie("access_token", token, {
         httpOnly: false,
-        secure: false,
+        secure: true,
         sameSite: "none",
         maxAge: 24 * 60 * 60 * 1000,
         path: "/",
-        domain: ".railway.app",
       });
 
       return res.status(201).json({
@@ -195,12 +194,14 @@ class UsuarioController {
   async logOut(req, res) {
     res.clearCookie("access_token", {
       httpOnly: false,
-      secure: false,
+      secure: true,
       sameSite: "none",
       path: "/",
-      domain: "railway.app",
     });
-    res.status(200).json({ message: "Logout exitoso" });
+
+    res.status(200).json({
+      message: "Logout exitoso",
+    });
   }
 
   async verificarToken(req, res) {

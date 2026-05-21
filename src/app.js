@@ -12,6 +12,7 @@ import cookieParser from "cookie-parser";
 dotenv.config();
 
 const app = express();
+app.set("trust proxy", 1);
 const server = createServer(app);
 
 const isDev = process.env.NODE_ENV !== "production";
