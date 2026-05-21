@@ -176,7 +176,7 @@ class UsuarioController {
 
       res.cookie("access_token", token, {
         httpOnly: false,
-        secure: true,
+        secure: false,
         sameSite: "none",
         maxAge: 24 * 60 * 60 * 1000,
         path: "/",
@@ -195,7 +195,7 @@ class UsuarioController {
   async logOut(req, res) {
     res.clearCookie("access_token", {
       httpOnly: false,
-      secure: true,
+      secure: false,
       sameSite: "none",
       path: "/",
       domain: ".railway.app",
