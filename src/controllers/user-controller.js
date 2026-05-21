@@ -155,11 +155,9 @@ class UsuarioController {
 
       // ✅ Validamos si está aprobado
       if (!usuario.aprobado) {
-        return res
-          .status(403)
-          .json({
-            message: "Tu cuenta aún no fue aprobada por un administrador.",
-          });
+        return res.status(403).json({
+          message: "Tu cuenta aún no fue aprobada por un administrador.",
+        });
       }
 
       // 🔐 Verificamos password
@@ -178,11 +176,11 @@ class UsuarioController {
 
       res.cookie("access_token", token, {
         httpOnly: false,
-        secure: true,
-        sameSite: "None",
+        secure: false,
+        sameSite: "none",
         maxAge: 24 * 60 * 60 * 1000,
         path: "/",
-        domain: ".autosmartapp.com",
+        domain: ".railway.app",
       });
 
       return res.status(201).json({
@@ -197,10 +195,10 @@ class UsuarioController {
   async logOut(req, res) {
     res.clearCookie("access_token", {
       httpOnly: false,
-      secure: true,
-      sameSite: "None",
+      secure: false,
+      sameSite: "none",
       path: "/",
-      domain: ".autosmartapp.com",
+      domain: "railway.app",
     });
     res.status(200).json({ message: "Logout exitoso" });
   }
