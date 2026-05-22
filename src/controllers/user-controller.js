@@ -4,7 +4,6 @@ import jwt from "jsonwebtoken";
 import UsuarioModel from "../dao/models/usuario-model.js";
 import generateToken from "../utils/jsonwebtoken.js";
 
-
 class UsuarioController {
   // Crear un nuevo usuario
   async crearUsuario(req, res) {
@@ -149,24 +148,19 @@ class UsuarioController {
       const { email, password } = req.body;
       const usuario = await UsuarioModel.findOne({ email });
 
-      if (!usuario) {
+      if (!usuario)
         return res.status(404).json({ message: "Usuario no encontrado" });
-      }
+      if (!usuario.aprobado)
+        return res
+          .status(403)
+          .json({
+            message: "Tu cuenta aún no fue aprobada por un administrador.",
+          });
 
-      // ✅ Validamos si está aprobado
-      if (!usuario.aprobado) {
-        return res.status(403).json({
-          message: "Tu cuenta aún no fue aprobada por un administrador.",
-        });
-      }
-
-      // 🔐 Verificamos password
       const esValida = await bcrypt.compare(password, usuario.password);
-      if (!esValida) {
+      if (!esValida)
         return res.status(401).json({ message: "Contraseña incorrecta" });
-      }
 
-      // 🪪 Generamos token
       const token = generateToken({
         _id: usuario._id,
         email: usuario.email,
@@ -174,23 +168,21 @@ class UsuarioController {
         rol: usuario.rol,
       });
 
-      const isProduction = process.env.NODE_ENV === "production";
-
-      console.log("🍪 seteando cookie...");
-      console.log("isProduction:", isProduction);
+      const isProd = process.env.NODE_ENV === "production";
 
       res.cookie("access_token", token, {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? "none" : "lax",
+        httpOnly: true, // ✅ más seguro, JS no puede leerla
+        secure: isProd, // ✅ true en prod (HTTPS), false en local
+        sameSite: isProd ? "none" : "lax", // ✅ "none" solo cuando secure: true
         maxAge: 24 * 60 * 60 * 1000,
         path: "/",
+        // ❌ Saca el domain, Railway lo maneja solo
       });
 
-      console.log("🍪 cookie seteada");
-
+      // ✅ Faltaba el return con la respuesta
       return res.status(200).json({
-        message: "Login correcto",
+        message: "Login exitoso",
+        usuario: { email: usuario.email, rol: usuario.rol },
       });
     } catch (error) {
       res.status(500).json({ message: "Error de Login: " + error.message });
@@ -198,17 +190,17 @@ class UsuarioController {
   }
 
   async logOut(req, res) {
+    const isProd = process.env.NODE_ENV === "production";
+
     res.clearCookie("access_token", {
-      httpOnly: false,
-      secure: false,
-      sameSite: "none",
+      httpOnly: true,
+      secure: isProd,
+      sameSite: isProd ? "none" : "lax",
       path: "/",
-      domain: ".railway.app",
+      // ❌ Sin domain
     });
 
-    res.status(200).json({
-      message: "Logout exitoso",
-    });
+    res.status(200).json({ message: "Logout exitoso" });
   }
 
   async verificarToken(req, res) {

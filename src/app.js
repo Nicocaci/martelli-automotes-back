@@ -28,6 +28,9 @@ if (isDev) {
 }
 
 // ✅ CORS
+app.use(cookieParser());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -41,11 +44,8 @@ app.use(
     credentials: true,
   })
 );
-
-app.use(express.json());
 app.use("/uploads", express.static("uploads"));
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
+
 
 // Socket.IO
 const io = new Server(server, {
